@@ -1,0 +1,35 @@
+###
+GET http://localhost:8000/products
+
+###
+GET http://localhost:8000/products/1
+
+###
+POST  http://localhost:8000/products
+Content-Type: application/json
+
+{
+        "id" : 4,
+        "name" : "test4",
+        "description" : "test4",
+        "image" : "test4",
+        "price" : 1000,
+        "color": "test4",
+        "category" : 1
+}
+
+###
+PUT http://localhost:8000/products/1
+Content-Type: application/json
+
+{
+        "name" : "test1",
+        "description" : "test1",
+        "image" : "test1",
+        "price" : 1000,
+        "color": "test1",
+        "category" : 1
+}
+
+###
+DELETE http://localhost:8000/products/6
