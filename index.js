@@ -3,26 +3,29 @@ const express = require('express');
 const cors = require('cors');
 const createError = require('http-errors');
 const app = express();
-const productRouter = require('./src/routes/products.js')
+const mainRouter = require('./src/routes/index.js')
+const host = process.env.DB_HOST;
+const port = process.env.PORT
 
-//middleware
+
+
 app.use(express.json());
 app.use(cors())
-
-
-app.use('/products', productRouter)
+app.use('/api/v1', mainRouter)
 
 app.all('*', (req, res, next) => {
   next(new createError.NotFound())
 })
 
-app.get('/', function (req, res) {
-  res.send('hello, world!')
-})
+// app.use((err,req,res,next)=>{
+//   const messageError = err.message || "internal server error"
+//   const statusCode = err.status || 500
 
+//   res.status(statusCode).json({
+//     message : messageError
+//   })
+// })
 
-const host = process.env.DB_HOST;
-const port = process.env.PORT
 app.listen(port, ()=> {
     console.log(`server running on http://${host}:${port}`)
 })

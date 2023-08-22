@@ -1,4 +1,4 @@
-const pool = require("../config/db.js");
+const pool = require('../config/db.js');
 // --------------------------------------------------------------------------------------//
 // The error you're encountering is likely due to the fact that you're using placeholders 
 // for column names ($1 and $2) in the ORDER BY clause of your SQL query.
@@ -19,7 +19,7 @@ const pool = require("../config/db.js");
 // --------------------------------------------------------------------------------------//
 
 const selectAll = ({ limit, offset, sort, sortby }) => {
-  const validColumns = ['name', 'description', 'price', 'color', 'category'];
+  const validColumns = ['name', 'description', 'image', 'price', 'color', 'category'];
   if (!validColumns.includes(sortby)) {
     throw new Error(`Invalid column name: ${sortby}`);
   }
