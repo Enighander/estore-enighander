@@ -15,7 +15,7 @@ const categoryController = {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 5;
       const offset = (page - 1) * limit;
-      const sortby = req.query.sortby || "name";
+      const sortby = req.query.sortby || "id";
       const sort = req.query.sort ? req.query.sort.toUpperCase() : "ASC";
       const result = await selectAll({ limit, offset, sort, sortby });
       const {
