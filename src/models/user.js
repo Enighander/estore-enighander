@@ -2,7 +2,7 @@ const pool = require("../config/db.js");
 
 const findEmail = async (email) => {
   try {
-    const result = await pool.query("SELECT * FROM user WHERE email = $1", [
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
     return result;
@@ -12,12 +12,11 @@ const findEmail = async (email) => {
 };
 
 const create = async (data) => {
-  const { username, email, passwordHash, role } = data;
-
+  const {id, username, email, passwordHash, role } = data;
   try {
     const result = await pool.query(
-      "INSERT INTO product (username, email, passwordHash, role) VALUES($1, $2, $3, $4)",
-      [username, email, passwordHash, role]
+      "INSERT INTO users (id, username, email, password, role) VALUES($1, $2, $3, $4, $5)",
+      [id, username, email, passwordHash, role]
     );
     return result;
   } catch (error) {

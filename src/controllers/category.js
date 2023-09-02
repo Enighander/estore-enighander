@@ -6,7 +6,7 @@ const {
   insert,
   update,
   findId,
-  deleteData
+  deleteData,
 } = require("../models/category.js");
 
 const categoryController = {
@@ -43,8 +43,8 @@ const categoryController = {
   },
   getCategory: async (req, res, next) => {
     const id = Number(req.params.id);
+    const result = await select(id);
     try {
-      const result = await select(id);
       if (result.rows.length === 0) {
         return commonHelper.response(res, null, 404, "Category not found");
       }
@@ -66,23 +66,19 @@ const categoryController = {
     const data = {
       id,
       name,
-      image
+      image,
     };
-
     try {
       const result = await insert(data);
       commonHelper.response(res, result.rows, 201, "Category created");
     } catch (error) {
       console.log(error);
-      res
-      .status(500)
-      .send("An error occurred while created the category.");
+      res.status(500).send("An error occurred while created the category.");
     }
   },
   updateCategory: async (req, res, next) => {
     const id = Number(req.params.id);
     const { name, image } = req.body;
-
     try {
       const { rowCount } = await findId(id);
 
@@ -91,8 +87,8 @@ const categoryController = {
       }
 
       const data = {
-        name, 
-        image
+        name,
+        image,
       };
 
       const result = await update(data, id);
@@ -121,7 +117,7 @@ const categoryController = {
       console.log(error);
       res.status(500).send("An error occurred while deleted the category.");
     }
-  }
+  },
 };
 
 module.exports = categoryController;

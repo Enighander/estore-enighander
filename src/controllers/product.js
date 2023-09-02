@@ -1,4 +1,4 @@
-const commonHelper = require('../helper/common.js');
+const commonHelper = require("../helper/common.js");
 const {
   selectAll,
   select,
@@ -7,7 +7,7 @@ const {
   update,
   deleteData,
   findId,
-} = require('../models/product.js');
+} = require("../models/product.js");
 
 const productController = {
   getAllProducts: async (req, res) => {
@@ -38,12 +38,13 @@ const productController = {
       );
     } catch (error) {
       console.log(error);
+      res.status(500).send("An error occurred while get all the products.");
     }
   },
   getProduct: async (req, res) => {
     const id = Number(req.params.id);
+    const result = await select(id);
     try {
-      const result = await select(id);
       if (result.rows.length === 0) {
         return commonHelper.response(res, null, 404, "Product not found");
       }
@@ -55,38 +56,43 @@ const productController = {
       );
     } catch (error) {
       console.log(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("An error occurred while get specific product.");
     }
   },
   insertProduct: async (req, res) => {
-    const { name, description, image, price, color, category } = req.body;
-    const {
-      rows: [count],
-    } = await countData();
-    const id = Number(count.count) + 1;
-
-    const data = {
-      id,
-      name,
-      description,
-      image,
-      price,
-      color,
-      category,
-    };
-    insert(data)
-      .then((result) =>
-        commonHelper.response(res, result.rows, 201, "Product created")
-      )
-      .catch((err) => res.send(err));
+    try {
+      const PORT = process.env.PORT || 8000
+      const DB_HOST = process.env.DB_HOST || 'localhost'
+      const { name, description, price, color, category } = req.body;
+      const image = req.file.filename;
+      const {
+        rows: [count],
+      } = await countData();
+      const id = Number(count.count) + 1;
+      const data = {
+        id,
+        name,
+        description,
+        image:`http://${DB_HOST}:${PORT}/img/${image}`,
+        price,
+        color,
+        category,
+      };
+      const result = await insert(data);
+      commonHelper.response(res, result.rows, 201, "Product created");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred while create the product.");
+    }
   },
   updateProduct: async (req, res) => {
     const id = Number(req.params.id);
-    const { name, description, image, price, color, category } = req.body;
-
+    const PORT = process.env.PORT || 8000
+    const DB_HOST = process.env.DB_HOST || 'localhost'
+    const image = req.body.filename
+    const { name, description, price, color, category } = req.body;
     try {
       const { rowCount } = await findId(id);
-
       if (!rowCount) {
         return commonHelper.response(res, null, 404, "Product not found");
       }
@@ -94,7 +100,7 @@ const productController = {
       const data = {
         name,
         description,
-        image,
+        image:`http://${DB_HOST}:${PORT}/img/${image}`,
         price,
         color,
         category,
@@ -109,24 +115,24 @@ const productController = {
       );
     } catch (error) {
       console.log(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("An error occurred while update the product.");
     }
   },
   deleteProduct: async (req, res) => {
     const id = Number(req.params.id);
     try {
       const deleteResult = await deleteData(id);
-  
+
       if (deleteResult.rowCount === 0) {
         return commonHelper.response(res, null, 404, "Product not found");
       }
-  
+
       commonHelper.response(res, null, 200, "Product deleted successfully");
     } catch (error) {
       console.log(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("An error occurred while get deleted the products.");
     }
-  }
+  },
 };
 
 module.exports = productController;
