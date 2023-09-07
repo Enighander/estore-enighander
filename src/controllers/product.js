@@ -1,4 +1,5 @@
 const commonHelper = require("../helper/common.js");
+const client = require("../config/redis.js");
 const {
   selectAll,
   select,
@@ -10,6 +11,7 @@ const {
 } = require("../models/product.js");
 
 const productController = {
+  
   getAllProducts: async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
@@ -42,27 +44,34 @@ const productController = {
     }
   },
   getProduct: async (req, res) => {
-    const id = Number(req.params.id);
-    const result = await select(id);
     try {
-      if (result.rows.length === 0) {
-        return commonHelper.response(res, null, 404, "Product not found");
+      const id = Number(req.params.id);
+      const cachedData = await client.get(`products/${id}`);
+      if (cachedData) {
+        return response(
+          res,
+          JSON.parse(cachedData),
+          200,
+          "Data retrieved from Redis cache"
+        );
       }
-      commonHelper.response(
-        res,
-        result.rows,
-        200,
-        "get data success from database"
-      );
+      const result = await select(id);
+      if (result.rows.length === 0) {
+        return response(res, null, 404, "Product not found");
+      }
+      await client.set(`products/${id}`, JSON.stringify(result.rows));
+      response(res, result.rows, 200, "Data retrieved from the database");
     } catch (error) {
-      console.log(error);
-      res.status(500).send("An error occurred while get specific product.");
+      console.error(error);
+      res
+        .status(500)
+        .send("An error occurred while fetching the specific product.");
     }
   },
   insertProduct: async (req, res) => {
     try {
-      const PORT = process.env.PORT || 8000
-      const DB_HOST = process.env.DB_HOST || 'localhost'
+      const PORT = process.env.PORT || 8000;
+      const DB_HOST = process.env.DB_HOST || "localhost";
       const { name, description, price, color, category } = req.body;
       const image = req.file.filename;
       const {
@@ -73,7 +82,7 @@ const productController = {
         id,
         name,
         description,
-        image:`http://${DB_HOST}:${PORT}/img/${image}`,
+        image: `http://${DB_HOST}:${PORT}/img/${image}`,
         price,
         color,
         category,
@@ -87,9 +96,9 @@ const productController = {
   },
   updateProduct: async (req, res) => {
     const id = Number(req.params.id);
-    const PORT = process.env.PORT || 8000
-    const DB_HOST = process.env.DB_HOST || 'localhost'
-    const image = req.body.filename
+    const PORT = process.env.PORT || 8000;
+    const DB_HOST = process.env.DB_HOST || "localhost";
+    const image = req.body.filename;
     const { name, description, price, color, category } = req.body;
     try {
       const { rowCount } = await findId(id);
@@ -100,7 +109,7 @@ const productController = {
       const data = {
         name,
         description,
-        image:`http://${DB_HOST}:${PORT}/img/${image}`,
+        image: `http://${DB_HOST}:${PORT}/img/${image}`,
         price,
         color,
         category,

@@ -9,12 +9,13 @@ const helmet = require("helmet");
 const host = process.env.DB_HOST;
 const port = process.env.PORT;
 
+
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use('/api/v1', mainRouter);
-app.use('img', express.static('src/images'))
+app.use('/img', express.static('src/temp/image'))
 
 app.all("*", (req, res, next) => {
   next(new createError.NotFound());
