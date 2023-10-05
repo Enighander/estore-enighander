@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middlewares/upload.js');
+const uploadProduct = require('../middlewares/uploadProduct.js')
 const productController = require('../controllers/product.js');
-const {protect} = require('../middlewares/auth.js');
 const {hitCacheProductDetail,clearCacheProductDetail} = require('../middlewares/redis.js');
 const {validateProductRequest} = require('../validator/product.js');
 
 
-router.get('/',protect,productController.getAllProducts);
-router.get('/:id',protect,hitCacheProductDetail,productController.getProduct);
-router.post('/',protect,upload.single('image'),validateProductRequest,productController.insertProduct);
-router.put('/:id',protect,clearCacheProductDetail,upload.single('image'),productController.updateProduct);
-router.delete('/:id',protect,clearCacheProductDetail,productController.deleteProduct);
+
+router
+.get('/',productController.getAllProducts)
+.get('/:id',hitCacheProductDetail,productController.getProduct)
+.post('/',uploadProduct,validateProductRequest,productController.insertProduct)
+.put('/:id',clearCacheProductDetail,uploadProduct,productController.updateProduct)
+.delete('/:id',clearCacheProductDetail,productController.deleteProduct);
 
 
 

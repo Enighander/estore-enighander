@@ -44,9 +44,7 @@ const selectAll = async ({ limit, offset, sort, sortby }) => {
 
 const select = async (id) => {
   try {
-    const result = await pool.query("SELECT * FROM product WHERE id = $1", [
-      id,
-    ]);
+    const result = await pool.query("SELECT * FROM product WHERE id = $1", [id,]);
     return result;
   } catch (error) {
     throw error;
@@ -54,12 +52,11 @@ const select = async (id) => {
 };
 
 const insert = async (data) => {
-  const { name, description, image, price, color, category } = data;
-
+  const { id, name, description, image, price, color, category } = data;
   try {
     const result = await pool.query(
-      "INSERT INTO product (name, description, image, price, color, category) VALUES($1, $2, $3, $4, $5, $6)",
-      [name, description, image, price, color, category]
+      "INSERT INTO product (id, name, description, image, price, color, category) VALUES($1, $2, $3, $4, $5, $6, $7)",
+      [id, name, description, image, price, color, category]
     );
     return result;
   } catch (error) {

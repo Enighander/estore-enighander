@@ -1,5 +1,7 @@
+const { v4: uuidv4 } = require("uuid");
 const commonHelper = require("../helper/common.js");
 const client = require("../config/redis.js");
+const cloudinary = require("../middlewares/claudinary.js");
 const {
   selectAll,
   select,
@@ -11,7 +13,6 @@ const {
 } = require("../models/product.js");
 
 const productController = {
-  
   getAllProducts: async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
@@ -45,7 +46,7 @@ const productController = {
   },
   getProduct: async (req, res) => {
     try {
-      const id = Number(req.params.id);
+      const id = String(req.params.id);
       const cachedData = await client.get(`products/${id}`);
       if (cachedData) {
         return response(
@@ -60,7 +61,7 @@ const productController = {
         return response(res, null, 404, "Product not found");
       }
       await client.set(`products/${id}`, JSON.stringify(result.rows));
-      response(res, result.rows, 200, "Data retrieved from the database");
+      commonHelper.response(res, result.rows, 200, "Data retrieved from the database");
     } catch (error) {
       console.error(error);
       res
@@ -70,19 +71,18 @@ const productController = {
   },
   insertProduct: async (req, res) => {
     try {
-      const PORT = process.env.PORT || 8000;
-      const DB_HOST = process.env.DB_HOST || "localhost";
       const { name, description, price, color, category } = req.body;
       const image = req.file.filename;
-      const {
-        rows: [count],
-      } = await countData();
-      const id = Number(count.count) + 1;
+      // const { file } = req;
+      // if (file && file.path) {
+      //   const result = await cloudinary.uploader.upload(file.path);
+      //   image = result.secure_url;
+      // }
       const data = {
-        id,
+        id: uuidv4(),
         name,
         description,
-        image: `http://${DB_HOST}:${PORT}/img/${image}`,
+        image: `http://localhost:8000/img/${image}`,
         price,
         color,
         category,
@@ -95,7 +95,7 @@ const productController = {
     }
   },
   updateProduct: async (req, res) => {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     const PORT = process.env.PORT || 8000;
     const DB_HOST = process.env.DB_HOST || "localhost";
     const image = req.body.filename;
@@ -114,7 +114,7 @@ const productController = {
         color,
         category,
       };
-
+      
       const result = await update(data, id);
       commonHelper.response(
         res,
@@ -128,7 +128,7 @@ const productController = {
     }
   },
   deleteProduct: async (req, res) => {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     try {
       const deleteResult = await deleteData(id);
 
@@ -141,7 +141,7 @@ const productController = {
       console.log(error);
       res.status(500).send("An error occurred while get deleted the products.");
     }
-  },
+  }
 };
 
 module.exports = productController;

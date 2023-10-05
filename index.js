@@ -15,7 +15,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use('/api/v1', mainRouter);
-app.use('/img', express.static('src/temp/image'))
+app.use('/img', express.static('upload'))
 
 app.all("*", (req, res, next) => {
   next(new createError.NotFound());

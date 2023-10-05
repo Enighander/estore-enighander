@@ -1,7 +1,10 @@
 const pool = require("../config/db.js");
 
 const selectAll = async ({ limit, offset, sort, sortby }) => {
-  const validColumns = ["id", "name"];
+  const validColumns = [
+    "id", 
+    "name"
+  ];
 
   if (!validColumns.includes(sortby)) {
     throw new Error(`Invalid column name: ${sortby}`);

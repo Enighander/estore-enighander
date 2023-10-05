@@ -8,6 +8,7 @@ const {
   findId,
   deleteData,
 } = require("../models/category.js");
+// const joi = require("joi");
 
 const categoryController = {
   getAllCategory: async (req, res) => {
@@ -41,7 +42,7 @@ const categoryController = {
       res.status(500).send("An error occurred while get all the category.");
     }
   },
-  getCategory: async (req, res, next) => {
+  getCategory: async (req, res) => {
     const id = Number(req.params.id);
     const result = await select(id);
     try {
@@ -61,8 +62,19 @@ const categoryController = {
         .send("An error occurred while get specific the category.");
     }
   },
-  insertCategory: async (req, res, next) => {
-    const { id, name, image } = req.body;
+  insertCategory: async (req, res) => {
+    // const schema = joi.object({
+    //   id: joi.number(),
+    //   name: joi.string(),
+    //   image: joi.string()
+    // })
+    // const result = schema.validate(req.body);
+    // const { value, error } = result;
+    // if(error){
+    //   return commonHelper.response(res, result.rows, 422, error.message)
+    // }
+    const { id, name } = req.body;
+    const image = req.body.filename;
     const data = {
       id,
       name,
@@ -76,7 +88,7 @@ const categoryController = {
       res.status(500).send("An error occurred while created the category.");
     }
   },
-  updateCategory: async (req, res, next) => {
+  updateCategory: async (req, res) => {
     const id = Number(req.params.id);
     const { name, image } = req.body;
     try {
@@ -103,7 +115,7 @@ const categoryController = {
       res.status(500).send("An error occurred while updated the category.");
     }
   },
-  deleteCategory: async (req, res, next) => {
+  deleteCategory: async (req, res) => {
     const id = Number(req.params.id);
     try {
       const deleteResult = await deleteData(id);
