@@ -26,6 +26,7 @@ const selectAll = async ({ limit, offset, sort, sortby }) => {
     "price",
     "color",
     "category",
+    "admin_id"
   ];
 
   if (!validColumns.includes(sortby)) {
@@ -51,12 +52,43 @@ const select = async (id) => {
   }
 };
 
-const insert = async (data) => {
-  const { id, name, description, image, price, color, category } = data;
+const selectProductByCategoryId = async (category) => {
   try {
     const result = await pool.query(
-      "INSERT INTO product (id, name, description, image, price, color, category) VALUES($1, $2, $3, $4, $5, $6, $7)",
-      [id, name, description, image, price, color, category]
+      `SELECT product.* FROM product JOIN category ON product.category = category.id WHERE category.id = $1`, [category,]);
+    return result.rows;
+  } catch (error) {
+    throw error
+  }
+};
+
+const selectProductByAdminId = async (admin_id) => {
+  try {
+    const result = await pool.query(
+      `SELECT product.* FROM product JOIN admin ON product.admin_id = admin.id WHERE admin.id = $1`, [admin_id,])
+    return result.rows;
+  } catch (error) {
+    throw error
+  }
+};
+
+const searchProduct = async ({search}) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM product WHERE name ILIKE $1',[`%${search}%`]
+    );
+    return result;
+  } catch (error) {
+    throw error
+  }
+};
+
+const insert = async (data) => {
+  const { id, name, description, image, price, color, category, admin_id } = data;
+  try {
+    const result = await pool.query(
+      "INSERT INTO product (id, name, description, image, price, color, category, admin_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8)",
+      [id, name, description, image, price, color, category, admin_id]
     );
     return result;
   } catch (error) {
@@ -110,6 +142,9 @@ const deleteData = async (id) => {
 module.exports = {
   selectAll,
   select,
+  selectProductByCategoryId,
+  selectProductByAdminId,
+  searchProduct,
   insert,
   update,
   deleteData,

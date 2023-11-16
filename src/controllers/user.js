@@ -1,7 +1,7 @@
-const createError = require("http-errors");
-const { v4: uuidv4 } = require("uuid");
-const claudinary = require("../middlewares/claudinary.js");
+// const claudinary = require("../middlewares/claudinary.js");
 const commonHelper = require("../helper/common.js");
+const { v4: uuidv4 } = require("uuid");
+const createError = require("http-errors");
 const {
   selectAll,
   select,
@@ -12,7 +12,6 @@ const {
   deleteData,
   countData,
 } = require("../models/user.js");
-
 const bcrypt = require("bcryptjs");
 const authHelper = require("../helper/auth.js");
 const jwt = require("jsonwebtoken");
@@ -66,11 +65,11 @@ const userController = {
       console.log(error);
       res
         .status(500)
-        .send("An error occurred while get specific the category.");
+        .send("An error occurred while get specific the user.");
     }
   },
   registerUser: async (req, res, next) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, phone } = req.body;
     const { rowCount } = await findEmail(email);
     try {
       if (rowCount) {
@@ -84,6 +83,7 @@ const userController = {
         id: uuidv4(),
         username,
         email,
+        phone,
         passwordHash,
         role: "user",
       };
@@ -96,7 +96,7 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     const id = String(req.params.id);
-    const { username, email } = req.body;
+    const { username, email, phone } = req.body;
     try {
       const { rowCount } = await findUUID(id);
       if (!rowCount) {
@@ -106,6 +106,7 @@ const userController = {
         id,
         username,
         email,
+        phone
       };
       const result = await update(data);
       commonHelper.response(
@@ -129,7 +130,6 @@ const userController = {
         return next(createError(403, "Invalid password. Please try again"));
       }
       const isValidPassword = bcrypt.compareSync(password, user.password);
-      console.log(isValidPassword);
 
       if (!isValidPassword) {
         return next(createError(403, "Invalid email. Please try again"));
@@ -141,23 +141,19 @@ const userController = {
       };
       user.token = authHelper.generateToken(payload);
       user.refreshToken = authHelper.generateRefreshToken(payload);
-
       commonHelper.response(res, user, 201, "log in successful");
     } catch (error) {
       console.log(error);
       res.status(500).send("An error occurred while login the account.");
     }
   },
-  // logoutUser : async (req, res , next) => {
-
-  // },
   profileUser: async (req, res, next) => {
     const email = req.payload.email;
     const {
-      rows: [user],
+      rows: [users],
     } = await findEmail(email);
-    delete user.password;
-    commonHelper.response(res, user, 200);
+    delete users.password;
+    commonHelper.response(res, users, 200);
   },
   deleteUser: async (req, res, next) => {
     const id = String(req.params.id);

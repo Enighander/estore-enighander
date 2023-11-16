@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require ('../controllers/user.js')
-
+// const {protect} = require('../middlewares/auth.js')
 
 
 router
@@ -11,14 +11,8 @@ router
 .post ('/login', userController.loginUser)
 .put ('/:id', userController.updateUser)
 .post ('/refresh-token', userController.refreshToken)
-.get ('/profile', userController.profileUser)
+.get ('/profile',userController.profileUser)
 .delete ('/:id', userController.deleteUser);
-
-
-
-
-
-
 
 
 module.exports = router

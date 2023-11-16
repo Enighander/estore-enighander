@@ -1,10 +1,7 @@
-const { v4: uuidv4 } = require("uuid");
 // const claudinary = require("../middlewares/claudinary.js");
 const commonHelper = require("../helper/common.js");
+const { v4: uuidv4 } = require("uuid");
 const createError = require("http-errors");
-const bcrypt = require("bcryptjs");
-const authHelper = require("../helper/auth.js");
-const jwt = require("jsonwebtoken");
 const {
   selectAll,
   update,
@@ -12,8 +9,11 @@ const {
   countData,
   findEmail,
   deleteData,
-  findId,
+  select,
 } = require("../models/admin.js");
+const bcrypt = require("bcryptjs");
+const authHelper = require("../helper/auth.js");
+const jwt = require("jsonwebtoken");
 
 const adminController = {
   getAllAdmin: async (req, res) => {
@@ -45,6 +45,26 @@ const adminController = {
     } catch (err) {
       console.error(err);
       res.status(500).send(err.message);
+    }
+  },
+  getAdmin: async (req, res) => {
+    const id = req.params.id;
+    const result = await select(id);
+    try {
+      if (result.rows.length === 0) {
+        return commonHelper.response(res, null, 404, "Admin not found");
+      }
+      commonHelper.response(
+        res,
+        result.rows,
+        200,
+        "get data success from database"
+      );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .send("An error occurred while get specific the admin.");
     }
   },
   registerAdmin: async (req, res, next) => {
@@ -83,7 +103,6 @@ const adminController = {
         return next(createError(403, "Invalid password. Please try again"));
       }
       const isValidPassword = bcrypt.compareSync(password, admin.password);
-      console.log(isValidPassword);
 
       if (!isValidPassword) {
         return next(createError(403, "Invalid email. Please try again"));
@@ -95,7 +114,6 @@ const adminController = {
       };
       admin.token = authHelper.generateToken(payload);
       admin.refreshToken = authHelper.generateRefreshToken(payload);
-
       commonHelper.response(res, admin, 201, "log in successful");
     } catch (error) {
       console.log(error);
@@ -106,7 +124,7 @@ const adminController = {
     const id = String(req.params.id);
     const { username, email } = req.body;
     try {
-      const { rowCount } = await findId(id);
+      const { rowCount } = await select(id);
       if (!rowCount) {
         return commonHelper.response(res, null, 404, "ID not found");
       }
@@ -121,6 +139,14 @@ const adminController = {
       console.error(error);
       return res.status(500).send("An error occurred while updating the data.");
     }
+  },
+  profileAdmin: async (req, res, next) => {
+    const email = req.payload.email;
+    const {
+      rows: [user],
+    } = await findEmail(email);
+    delete user.password;
+    commonHelper.response(res, user, 200);
   },
   deleteAdmin: async (req, res) => {
     const id = String(req.params.id);

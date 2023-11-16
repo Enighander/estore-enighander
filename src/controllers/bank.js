@@ -46,19 +46,21 @@ const bankController = {
     }
   },
   insertBank: async (req, res) => {
-    const id = uuidv4();
+    const PORT = process.env.PORT || 8000;
+    const DB_HOST = process.env.DB_HOST || "localhost";
     const { bank_name } = req.body;
-    const photo_bank = req.body.filename;
+    const photo_bank = req.file.filename;
     try {
       const data = {
-        id,
+        id: uuidv4(),
         bank_name,
-        photo_bank: `http://localhost:8000/img/${photo_bank}`,
+        photo_bank: `http://${DB_HOST}:${PORT}/img/${photo_bank}`,
       };
       const result = await insert(data);
       commonHelper.response(res, result.rows, 201, "Create Success");
     } catch (error) {
       console.log(error);
+      res.status(500).send("An error occurred while create the bank.");
     }
   },
   deleteBank: async (req, res, next) => {

@@ -47,11 +47,11 @@ const findUUID = async (id) => {
 };
 
 const create = async (data) => {
-  const { id, username, email, passwordHash, role } = data;
+  const { id, username, email, phone, passwordHash, role } = data;
   try {
     const result = await pool.query(
-      "INSERT INTO users (id, username, email, password, role) VALUES($1, $2, $3, $4, $5)",
-      [id, username, email, passwordHash, role]
+      "INSERT INTO users (id, username, email, phone, password, role) VALUES($1, $2, $3, $4, $5, $6)",
+      [id, username, email, phone, passwordHash, role]
     );
     return result;
   } catch (error) {
@@ -60,11 +60,11 @@ const create = async (data) => {
 };
 
 const update = async (data) => {
-  const {id, username, email} = data;
+  const {id, username, email, phone} = data;
   try {
     const result = await pool.query(
-      "UPDATE users SET username = $1, email = $2 WHERE id = $3",
-      [username, email, id]
+      "UPDATE users SET username = $1, email = $2, phone = $3 WHERE id = $4",
+      [username, email, id, phone]
     );
     return result;
   } catch (error) {
@@ -90,7 +90,6 @@ const countData = async () => {
     throw error;
   }
 };
-
 
 const findUserId = async (id) => {
   try {

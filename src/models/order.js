@@ -4,6 +4,7 @@ const selectAll = async ({ limit, offset, sort, sortby }) => {
   const validColumns = [
     "id",
     "user_id",
+    "admin_id",
     "order_color",
     "quantity",
     "total_price",
@@ -30,14 +31,31 @@ const selectAll = async ({ limit, offset, sort, sortby }) => {
   }
 };
 
-const selectOrderById = async (user_id) => {
+const selectOrdersById = async (admin_id) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, p.name AS product_name, p.image AS product_image, p.price AS product_price,
+      `SELECT o.*, p.name AS name, p.image AS image, p.price AS price,
       a.recipient_name, a.phone, a.address_as, a.address, a.city, a.postal_code 
       FROM "orders" AS o
-      LEFT JOIN "product" AS p ON o.product_id = p.name
-      LEFT JOIN "address" AS a ON o.address_id = a.address
+      LEFT JOIN "product" AS p ON o.product_id = p.id
+      LEFT JOIN "address" AS a ON o.address_id = a.id
+      WHERE o.admin_id = $1`,
+      [admin_id]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const selectUserById = async (user_id) => {
+  try {
+    const result = await pool.query(
+      `SELECT o.*, p.name AS name, p.image AS image, p.price AS price,
+      a.recipient_name, a.phone, a.address_as, a.address, a.city, a.postal_code 
+      FROM "orders" AS o
+      LEFT JOIN "product" AS p ON o.product_id = p.id
+      LEFT JOIN "address" AS a ON o.address_id = a.id
       WHERE o.user_id = $1`,
       [user_id]
     );
@@ -50,9 +68,9 @@ const selectOrderById = async (user_id) => {
 const selectOrderUser = async (user_id, status_order) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, p.name AS product_name, p.image AS product_image, p.price AS product_price
+      `SELECT o.*, p.name AS name, p.image AS image, p.price AS price
       FROM "orders" AS o
-      LEFT JOIN "product" AS p ON o.product_id = p.name
+      LEFT JOIN "product" AS p ON o.product_id = p.id
       WHERE o.user_id = $1 AND o.status_orders = $2`,
       [user_id, status_order]
     );
@@ -63,11 +81,11 @@ const selectOrderUser = async (user_id, status_order) => {
 };
 
 const insertOrder = async (data) => {
-  const { id, user_id, order_color, product_id, quantity } = data;
+  const { id, user_id, admin_id, order_color, product_id, quantity } = data;
   try {
     const result = await pool.query(
-      "INSERT INTO orders (id, user_id, order_color, product_id, quantity) VALUES($1, $2, $3, $4, $5)",
-      [id, user_id, order_color, product_id, quantity]
+      "INSERT INTO orders (id, user_id, admin_id, order_color, product_id, quantity) VALUES($1, $2, $3, $4, $5, $6)",
+      [id, user_id, admin_id, order_color, product_id, quantity]
     );
     return result;
   } catch (error) {
@@ -197,9 +215,19 @@ const deleteOrder = async (id) => {
   }
 };
 
+const deleteAllData = async () => {
+  try {
+    const result = await pool.query("DELETE FROM orders");
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   selectAll,
-  selectOrderById,
+  selectOrdersById,
+  selectUserById,
   selectOrderUser,
   insertOrder,
   updateOrder,
@@ -212,4 +240,5 @@ module.exports = {
   findUUID,
   findUserId,
   deleteOrder,
+  deleteAllData,
 };

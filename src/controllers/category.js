@@ -1,3 +1,4 @@
+const { v4 : uuid4 } = require("uuid")
 const commonHelper = require("../helper/common.js");
 const {
   selectAll,
@@ -43,7 +44,7 @@ const categoryController = {
     }
   },
   getCategory: async (req, res) => {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     const result = await select(id);
     try {
       if (result.rows.length === 0) {
@@ -73,14 +74,20 @@ const categoryController = {
     // if(error){
     //   return commonHelper.response(res, result.rows, 422, error.message)
     // }
-    const { id, name } = req.body;
-    const image = req.body.filename;
-    const data = {
-      id,
-      name,
-      image,
-    };
+    const PORT = process.env.PORT || 8000;
+    const DB_HOST = process.env.DB_HOST || "localhost";
+    const { name } = req.body;
+    const image = req.file.filename;
     try {
+      if (!req.file || !req.file.filename) {
+        return res.status(400).send("No image file provided.");
+      }
+
+      const data = {
+        id: uuid4(),
+        name,
+        image: `http://${DB_HOST}:${PORT}/img/${image}`,
+      };
       const result = await insert(data);
       commonHelper.response(res, result.rows, 201, "Category created");
     } catch (error) {
@@ -89,14 +96,21 @@ const categoryController = {
     }
   },
   updateCategory: async (req, res) => {
-    const id = Number(req.params.id);
-    const { name, image } = req.body;
+    const id = String(req.params.id);
+    const PORT = process.env.PORT || 8000;
+    const DB_HOST = process.env.DB_HOST || "localhost";
+
     try {
       const { rowCount } = await findId(id);
-
       if (!rowCount) {
         return commonHelper.response(res, null, 404, "Category not found");
       }
+
+      const image = req.file
+        ? `http://${DB_HOST}:${PORT}/img/${req.file.filename}`
+        : undefined;
+
+      const {name} = req.body;
 
       const data = {
         name,

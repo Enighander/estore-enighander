@@ -44,7 +44,7 @@ const update = async (data) => {
   }
 };
 
-const findId = async (id) => {
+const select = async (id) => {
   try {
     const result = await pool.query("SELECT * FROM admin WHERE id = $1", [id]);
     return result;
@@ -87,7 +87,7 @@ module.exports = {
   create,
   update,
   findEmail,
-  findId,
+  select,
   countData,
   deleteData,
 };

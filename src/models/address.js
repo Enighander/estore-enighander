@@ -75,7 +75,7 @@ const insert = async (data) => {
   }
 };
 
-const update= async (data) => {
+const update = async (data) => {
   const { id, recipient_name, address_as, address, phone, postal_code, city } = data;
   try {
     const result = await pool.query(

@@ -4,7 +4,8 @@ const createError = require("http-errors");
 const {
   selectAll,
   countData,
-  selectOrderById,
+  selectUserById,
+  selectOrdersById,
   selectOrderUser,
   findUserId,
   findUUID,
@@ -16,6 +17,7 @@ const {
   updateOrder,
   deleteOrder,
   insertOrder,
+  deleteAllData,
 } = require("../models/order.js");
 
 const orderController = {
@@ -56,10 +58,11 @@ const orderController = {
   },
   insert: async (req, res) => {
     const id = uuidv4();
-    const { user_id, order_color, product_id, quantity } = req.body;
+    const { user_id, admin_id, order_color, product_id, quantity } = req.body;
     const data = {
       id,
       user_id,
+      admin_id,
       order_color,
       product_id,
       quantity,
@@ -96,9 +99,22 @@ const orderController = {
       res.status(500).send("An error occurred while update the order");
     }
   },
+  getOrderById: async (req, res) => {
+    const admin_id = String(req.params.admin_id);
+    const result = await selectOrdersById(admin_id);
+    try {
+      if (result.rows.length === 0) {
+        return commonHelper.response(res, null, 404, "Order not found");
+      }
+      commonHelper.response(res, result.rows, 200, "get data success");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred while get specific order.");
+    }
+  },
   getOrderByUserId: async (req, res) => {
     const user_id = String(req.params.user_id);
-    const result = await selectOrderById(user_id);
+    const result = await selectUserById(user_id);
     try {
       if (result.rows.length === 0) {
         return commonHelper.response(res, null, 404, "Order not found");
@@ -219,6 +235,15 @@ const orderController = {
       return res
         .status(500)
         .send("An error occurred while get deleted the Order.");
+    }
+  },
+  deleteAll: async (req, res, next) => {
+    try {
+      const result = await deleteAllData(); // Use the deleteAllData query
+      commonHelper.response(res, result.rows, 200, "All data deleted successfully");
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("An error occurred while deleting all data.");
     }
   }
 };

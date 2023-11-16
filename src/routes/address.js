@@ -6,6 +6,7 @@ router
 .get('/',addressController.getAll)
 .get('/:user_id',addressController.getAddressByUserId)
 .post('/',addressController. insertAddress)
+.post('/:user_id', addressController.insertAddress)
 .put('/:id',addressController. updateAddress)
 .delete('/:id',addressController. deleteAddress);
 
