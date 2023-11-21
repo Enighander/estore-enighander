@@ -108,7 +108,7 @@ const updateOrder = async (data) => {
 };
 
 const updateGetPaidStatus = async (data) => {
-  const newStatus = "get paid";
+  const newStatus = "Paid";
   const { id } = data;
   try {
     const result = await pool.query(
