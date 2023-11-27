@@ -114,7 +114,7 @@ const insertOrder = async (data) => {
 };
 
 const updateOrder = async (data) => {
-  const newStatus = "get paid";
+  const newStatus = "Get Paid";
   const { id, address_id } = data;
   try {
     const result = await pool.query(
@@ -128,6 +128,10 @@ const updateOrder = async (data) => {
 };
 
 const updateGetPaidStatus = async (data) => {
+<<<<<<< HEAD
+=======
+  const newStatus = "Paid";
+>>>>>>> 4c67f26c8127fb39cc7ade87229f801fd7cb164f
   const { id } = data;
   const newStatus = "get paid";
   try {
