@@ -18,6 +18,7 @@ const {
   deleteOrder,
   insertOrder,
   deleteAllData,
+  selectOrderAdmin,
 } = require("../models/order.js");
 
 const orderController = {
@@ -78,7 +79,7 @@ const orderController = {
   update: async (req, res, next) => {
     const id = String(req.params.id);
     const { address_id } = req.body;
-    const { rowCount } = await findUserId(id);
+    const { rowCount } = await findUUID(id);
     try {
       if (!rowCount) {
         return next(createError(404, "ID is not Found"));
@@ -114,8 +115,9 @@ const orderController = {
   },
   getOrderByUserId: async (req, res) => {
     const user_id = String(req.params.user_id);
-    const result = await selectUserById(user_id);
     try {
+      const result = await selectUserById(user_id);
+      console.log("data :",result)
       if (result.rows.length === 0) {
         return commonHelper.response(res, null, 404, "Order not found");
       }
@@ -141,7 +143,23 @@ const orderController = {
         .send("An error occurred while get status order by user id.");
     }
   },
-  updateStatusGetPaid: async (req, res, next) => {
+  getStatusByAdminId: async (req, res) => {
+    const admin_id = String(req.params.admin_id);
+    const status_orders = String(req.params.status_orders);
+    try {
+      const result = await selectOrderAdmin(admin_id, status_orders);
+      if (result.rows.length === 0) {
+        return commonHelper.response(res, [], 404, "No pending orders found");
+      }
+      commonHelper.response(res, result.rows, 200, "get data success");
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .send("An error occurred while get status order by user id.");
+    }
+  },
+  updateStatusPaid: async (req, res, next) => {
     const user_id = String(req.params.user_id);
     const { rowCount } = await findUserId(user_id);
     try {

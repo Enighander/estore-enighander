@@ -7,6 +7,7 @@ router
 .get("/:admin_id", orderController.getOrderById)
 .get("/user/:user_id", orderController.getOrderByUserId)
 .get("/user/:user_id/:status_orders", orderController.getStatusByUserId)
+.get("/admin/:admin_id/:status_orders", orderController.getStatusByAdminId)
 .put("/:id/processed",orderController.updateStatusProcessed)
 .put("/:id/sent",orderController.updateStatusSent)
 .put("/:id/complete",orderController.updateStatusCompleted)

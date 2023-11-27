@@ -35,7 +35,8 @@ const selectOrdersById = async (admin_id) => {
   try {
     const result = await pool.query(
       `SELECT o.*, p.name AS name, p.image AS image, p.price AS price,
-      a.recipient_name, a.phone, a.address_as, a.address, a.city, a.postal_code 
+      a.recipient_name AS recipient_name, a.phone AS phone, a.address_as AS address_as,
+      a.address AS address, a.city AS city, a.postal_code AS postal_code
       FROM "orders" AS o
       LEFT JOIN "product" AS p ON o.product_id = p.id
       LEFT JOIN "address" AS a ON o.address_id = a.id
@@ -52,7 +53,8 @@ const selectUserById = async (user_id) => {
   try {
     const result = await pool.query(
       `SELECT o.*, p.name AS name, p.image AS image, p.price AS price,
-      a.recipient_name, a.phone, a.address_as, a.address, a.city, a.postal_code 
+      a.recipient_name AS recipient_name, a.phone AS phone,
+      a.address_as AS address_as, a.address AS address, a.city AS city, a.postal_code AS postal_code
       FROM "orders" AS o
       LEFT JOIN "product" AS p ON o.product_id = p.id
       LEFT JOIN "address" AS a ON o.address_id = a.id
@@ -73,6 +75,24 @@ const selectOrderUser = async (user_id, status_order) => {
       LEFT JOIN "product" AS p ON o.product_id = p.id
       WHERE o.user_id = $1 AND o.status_orders = $2`,
       [user_id, status_order]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const selectOrderAdmin = async (admin_id, status_order) => {
+  try {
+    const result = await pool.query(
+      `SELECT o.*, p.name AS name, p.image AS image, p.price AS price,
+      a.recipient_name AS recipient_name, a.phone AS phone,
+      a.address_as AS address_as, a.address AS address, a.city AS city, a.postal_code AS postal_code
+      FROM "orders" AS o
+      LEFT JOIN "product" AS p ON o.product_id = p.id
+      LEFT JOIN "address" AS a ON o.address_id = a.id
+      WHERE o.admin_id = $1 AND o.status_orders = $2`,
+      [admin_id, status_order]
     );
     return result;
   } catch (error) {
@@ -108,8 +128,8 @@ const updateOrder = async (data) => {
 };
 
 const updateGetPaidStatus = async (data) => {
-  const newStatus = "get paid";
   const { id } = data;
+  const newStatus = "get paid";
   try {
     const result = await pool.query(
       "UPDATE orders SET status_orders = $1 WHERE id = $2",
@@ -122,8 +142,8 @@ const updateGetPaidStatus = async (data) => {
 };
 
 const updateProceedStatus = async (data) => {
-  const newStatus = "Processed";
   const { id } = data;
+  const newStatus = "processed";
   try {
     const result = await pool.query(
       "UPDATE orders SET status_orders = $1 WHERE id =$2",
@@ -136,8 +156,8 @@ const updateProceedStatus = async (data) => {
 };
 
 const updateSendingStatus = async (data) => {
-  const newStatus = "Sent";
   const { id } = data;
+  const newStatus = "sent";
   try {
     const result = await pool.query(
       "UPDATE orders SET status_orders = $1 WHERE id =$2",
@@ -150,8 +170,8 @@ const updateSendingStatus = async (data) => {
 };
 
 const updateCompletedStatus = async (data) => {
-  const newStatus = "Complete";
   const { id } = data;
+  const newStatus = "complete";
   try {
     const result = await pool.query(
       "UPDATE orders SET status_orders = $1 WHERE id =$2",
@@ -164,8 +184,8 @@ const updateCompletedStatus = async (data) => {
 };
 
 const updateCanceledStatus = async (data) => {
-  const newStatus = "Cancel";
   const { id } = data;
+  const newStatus = "cancel";
   try {
     const result = await pool.query(
       "UPDATE orders SET status_orders = $1 WHERE id =$2",
@@ -229,6 +249,7 @@ module.exports = {
   selectOrdersById,
   selectUserById,
   selectOrderUser,
+  selectOrderAdmin,
   insertOrder,
   updateOrder,
   updateGetPaidStatus,
